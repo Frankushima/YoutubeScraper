@@ -2,7 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-from pytube import YouTube
+import pickle
+import youtube_dl as ydl
 import PySimpleGUI as sg
 
 #TO DO:
@@ -14,9 +15,45 @@ import PySimpleGUI as sg
 # Chrome WebDriver code
 # Make it headless later
 
+#Pickle this
+folderPath = ''
+
+try:
+    pickle_in = open("path.pickle", "rb")
+    userDict = pickle.load(pickle_in)
+
+except FileNotFoundError:
+    folderPath = 'downloads'
+
+# folderPath = 'C:/Users/Frank/Downloads'
+# folderPath = '/Users/frankYao/Downloads'
+
+youtubeOptions = {
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'outtmpl': folderPath + '/%(title)s.%(ext)s',
+}
+
+def updateOptions(newPath):
+    global youtubeOptions
+    youtubeOptions = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': newPath + '/%(title)s.%(ext)s',
+    }
+
 def downloadSong(songTitle, tag):
     options = Options()
     options.binary_location = 'chromedriver.exe'
+    options.headless = True
 
     driver = webdriver.Chrome()
     driver.get('https://www.youtube.com')
@@ -36,22 +73,21 @@ def downloadSong(songTitle, tag):
     songURL = driver.current_url.__str__()
     driver.close()
 
-    yt = YouTube(songURL)
-    global folderPath
-    yt.streams.filter(only_audio= True, subtype= 'mp4')[0].download(folderPath)
+    ydl.YoutubeDL(youtubeOptions).download([str(songURL)])
+
+def pickleVals():
+    pickle_out = open("path.pickle", "wb")
+    pickle.dump(folderPath, pickle_out)
+    pickle_out.close()
 
 # GUI
 
-#Pickle this
-folderPath = 'C:/Users/Frank/Downloads'
-# folderPath = '/Users/frankYao/Downloads'
-
 sg.theme('DarkAmber')    # Keep things interesting for your users
 
-layout = [[sg.Input(key = '-FILE-',visible= False, enable_events= True),sg.FileBrowse(button_text='Browse Download Folder',button_color=('white', 'green'))],
-          [sg.Input(key='-IN-', do_not_clear= False)],
-          [sg.Text(text= 'Songs: '),sg.Text(key= '-INPUTS-')],
-          [sg.Submit(button_text= 'Add Song'),sg.Button(button_text= 'Download', button_color= ('white' ,'green')), sg.Exit(button_color= ('white', 'red'))]]
+layout = [[sg.Input(key = '-FILE-',visible= False, enable_events= True ),sg.FolderBrowse(button_text='Browse Download Folder',button_color=('white', 'green'),font =("Times New Roman", 24))],
+          [sg.Input(key='-IN-', do_not_clear= False, font =("Times New Roman", 24))],
+          [sg.Text(text= 'Songs: ',font =("Times New Roman", 18)),sg.Text(size=(50,5),key= '-INPUTS-',font =("Times New Roman", 18))],
+          [sg.Submit(button_text= 'Add Song', font =("Times New Roman", 24)),sg.Button(button_text= 'Download', button_color= ('white' ,'green'),font =("Times New Roman", 24)), sg.Exit(button_color= ('white', 'red'),font =("Times New Roman", 24))]]
 
 window = sg.Window('Youtube Scraper', layout, resizable= True)
 
@@ -59,8 +95,8 @@ GUIInput = ''
 
 while True:                         # The Event Loop
     event, values = window.read()
-    print(event, values)
     if event == sg.WIN_CLOSED or event == 'Exit':
+        pickleVals()
         raise SystemExit(0)
     elif event == 'Add Song':
         if GUIInput == '':
@@ -72,6 +108,7 @@ while True:                         # The Event Loop
         break
     elif event == '-FILE-':
         folderPath = values['-FILE-']
+        updateOptions(folderPath)
 
 window.close()
 
@@ -84,3 +121,5 @@ tag = 'audio'
 
 for songTitle in songList:
     downloadSong(songTitle,tag)
+
+pickleVals()
