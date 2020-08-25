@@ -43,16 +43,17 @@ def downloadSong(songTitle, tag):
 # GUI
 
 #Pickle this
-folderPath = 'C:\\Users\\Frank\\Downloads'
+folderPath = 'C:/Users/Frank/Downloads'
+# folderPath = '/Users/frankYao/Downloads'
 
 sg.theme('DarkAmber')    # Keep things interesting for your users
 
 layout = [[sg.Input(key = '-FILE-',visible= False, enable_events= True),sg.FileBrowse(button_text='Browse Download Folder',button_color=('white', 'green'))],
-          [sg.Input(key='-IN-')],
-          [sg.Text(text= 'Songs:',key= '-INPUTS-')],
+          [sg.Input(key='-IN-', do_not_clear= False)],
+          [sg.Text(text= 'Songs: '),sg.Text(key= '-INPUTS-')],
           [sg.Submit(button_text= 'Add Song'),sg.Button(button_text= 'Download', button_color= ('white' ,'green')), sg.Exit(button_color= ('white', 'red'))]]
 
-window = sg.Window('Youtube Scraper', layout)
+window = sg.Window('Youtube Scraper', layout, resizable= True)
 
 GUIInput = ''
 
@@ -61,8 +62,16 @@ while True:                         # The Event Loop
     print(event, values)
     if event == sg.WIN_CLOSED or event == 'Exit':
         raise SystemExit(0)
-    elif event == 'Submit':
+    elif event == 'Add Song':
+        if GUIInput == '':
+            GUIInput += values['-IN-']
+        else:
+            GUIInput += ', ' + values['-IN-']
+        window['-INPUTS-'].update(GUIInput)
+    elif event == 'Download':
         break
+    elif event == '-FILE-':
+        folderPath = values['-FILE-']
 
 window.close()
 
@@ -73,5 +82,5 @@ songList = GUIInput.split(',')
 
 tag = 'audio'
 
-# for songTitle in songList:
-#    downloadSong(songTitle,tag)
+for songTitle in songList:
+    downloadSong(songTitle,tag)

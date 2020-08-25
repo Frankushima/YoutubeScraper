@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../League Account Manager/.idea/League Account Manager.iml" filepath="$PROJECT_DIR$/../League Account Manager/.idea/League Account Manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../LeagueAccountManager/.idea/League Account Manager.iml" filepath="$PROJECT_DIR$/../LeagueAccountManager/.idea/League Account Manager.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Test Project/.idea/Test Project.iml" filepath="$PROJECT_DIR$/../Test Project/.idea/Test Project.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/YoutubeScraper.iml" filepath="$PROJECT_DIR$/.idea/YoutubeScraper.iml" />
     </modules>
