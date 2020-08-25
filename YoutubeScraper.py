@@ -20,7 +20,7 @@ folderPath = ''
 
 try:
     pickle_in = open("path.pickle", "rb")
-    userDict = pickle.load(pickle_in)
+    folderPath = pickle.load(pickle_in)
 
 except FileNotFoundError:
     folderPath = 'downloads'
@@ -51,9 +51,12 @@ def updateOptions(newPath):
     }
 
 def downloadSong(songTitle, tag):
+
     options = Options()
     options.binary_location = 'chromedriver.exe'
-    options.headless = True
+    
+    # Apparently this doesnt even work with Chrome, might switch to firefox or IE?
+    # options.add_argument("--headless")
 
     driver = webdriver.Chrome()
     driver.get('https://www.youtube.com')
@@ -119,7 +122,25 @@ songList = GUIInput.split(',')
 
 tag = 'audio'
 
+total = len(songList)
+
+layout = [[sg.Text('Your Download is in Progress')],
+          [sg.Text(text='Progress: '), sg.Text(text= '0 / ' + str(total),size= (20, 1), key='progress')],
+          [sg.ProgressBar(total, orientation='h', size=(20, 20), key='progbar', bar_color=  ('red', 'white'))]]
+
+# create the Window
+window = sg.Window('Youtube Scraper', layout)
+
+i = 0
+
+event2, values2 = window.read(timeout= 0)
+
 for songTitle in songList:
     downloadSong(songTitle,tag)
+    i += 1
+    window['progbar'].update_bar(i)
+    window['progress'].update(str(i) + ' / ' + str(total))
+
+window.close()
 
 pickleVals()
